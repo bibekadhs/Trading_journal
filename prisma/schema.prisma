@@ -1,0 +1,85 @@
+// Trading Journal data model.
+// All complex nested shapes (entries[], exits[], setup, checklist,
+// executionReview, psychology, routine) are stored as JSON; their
+// TypeScript shapes live in src/lib/domain/types.ts and are the
+// source of truth.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Instrument {
+  MNQ
+  MES
+}
+
+enum Direction {
+  Long
+  Short
+}
+
+enum SessionWindow {
+  NY_open
+  NY_lunch
+  Outside
+}
+
+enum Outcome {
+  Win
+  Loss
+  Breakeven
+  StoppedEarly
+  TargetHit
+}
+
+// Daily journal entry. One row per (userId, date).
+// `userId` is the Clerk user id — we do not maintain a separate users
+// table because Clerk owns the identity.
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @db.Date
+  routine   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  trades    Trade[]
+
+  @@unique([userId, date])
+  @@index([userId, date(sort: Desc)])
+}
+
+model Trade {
+  id              String        @id @default(cuid())
+  sessionId       String
+  session         Session       @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  userId          String
+  // Trade timestamp (date + time-of-day). The Session.date is the
+  // calendar bucket; this is the actual fill time used for hour-of-day
+  // analytics.
+  occurredAt      DateTime
+  instrument      Instrument
+  direction       Direction
+  sessionWindow   SessionWindow
+  entries         Json
+  exits           Json
+  stopPrice       Float
+  targetPrice     Float
+  contracts       Int           @default(1)
+  outcome         Outcome
+  setup           Json
+  checklist       Json
+  executionReview Json
+  psychology      Json
+  htfUrl          String?
+  ltfUrl          String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([userId, occurredAt(sort: Desc)])
+  @@index([sessionId])
+}
