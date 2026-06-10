@@ -21,9 +21,11 @@ import type { DashboardSummary } from "@/lib/dashboard/aggregate";
 export function DashboardClient({
   sessionsEmpty,
   s,
+  basePath = "/",
 }: {
   sessionsEmpty: boolean;
   s: DashboardSummary;
+  basePath?: string;
 }) {
   const [showMoney, setShowMoney] = useState(false);
 
@@ -32,7 +34,7 @@ export function DashboardClient({
       <Card>
         <CardContent className="flex flex-col items-center gap-3 py-12 text-center text-muted-foreground">
           <p>Your dashboard will appear here once you log a session.</p>
-          <Link href="/log" className={buttonVariants()}>
+          <Link href={`${basePath}log`} className={buttonVariants()}>
             Log your first session
           </Link>
         </CardContent>
@@ -116,7 +118,7 @@ export function DashboardClient({
       {/* Row 2: Calendar + side panel */}
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <MonthlyCalendar pnlByDay={s.pnlByDay} avgAdh={s.avgAdh} showMoney={showMoney} />
+          <MonthlyCalendar pnlByDay={s.pnlByDay} avgAdh={s.avgAdh} showMoney={showMoney} basePath={basePath} />
         </div>
         <div className="flex flex-col gap-4">
           <ExpectancyGrid

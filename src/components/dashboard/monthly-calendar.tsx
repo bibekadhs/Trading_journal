@@ -10,10 +10,12 @@ export function MonthlyCalendar({
   pnlByDay,
   avgAdh,
   showMoney = true,
+  basePath = "/",
 }: {
   pnlByDay: { date: string; pnl: number }[];
   avgAdh: number;
   showMoney?: boolean;
+  basePath?: string;
 }) {
   const [currentDate, setCurrentDate] = useState(() => new Date());
 
@@ -191,7 +193,7 @@ export function MonthlyCalendar({
             );
 
             return hasTrade ? (
-              <Link key={day} href={`/journal?date=${dateStr}`} className="block">
+              <Link key={day} href={`${basePath}journal?date=${dateStr}`} className="block">
                 {dayContent}
               </Link>
             ) : (

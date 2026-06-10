@@ -22,9 +22,11 @@ import type { DraftSession, DraftTrade, Routine } from "@/lib/domain/types";
 
 interface Props {
   initial?: DraftSession | null;
+  basePath?: string;
+  onSave?: (session: DraftSession) => Promise<unknown>;
 }
 
-export function SessionForm({ initial }: Props) {
+export function SessionForm({ initial, basePath = "/", onSave }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [session, setSession] = useState<DraftSession>(
@@ -55,9 +57,13 @@ export function SessionForm({ initial }: Props) {
   function submit() {
     startTransition(async () => {
       try {
-        await saveSession(session);
+        if (onSave) {
+          await onSave(session);
+        } else {
+          await saveSession(session);
+        }
         toast.success("Session saved");
-        router.push("/journal");
+        router.push(`${basePath}journal`);
         router.refresh();
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Save failed");
@@ -108,7 +114,7 @@ export function SessionForm({ initial }: Props) {
       ))}
 
       <div className="sticky bottom-4 z-10 flex items-center justify-end gap-2 rounded-md border bg-background/90 p-3 shadow-lg backdrop-blur">
-        <Button type="button" variant="ghost" onClick={() => router.back()} disabled={pending}>
+        <Button type="button" variant="ghost" onClick={() => router.push(`${basePath}journal`)} disabled={pending}>
           Cancel
         </Button>
         <Button type="button" onClick={submit} disabled={pending}>

@@ -33,7 +33,7 @@ export interface FlatTrade {
   trade: DraftTrade;
 }
 
-export function JournalView({ sessions }: { sessions: DraftSession[] }) {
+export function JournalView({ sessions, basePath = "/" }: { sessions: DraftSession[]; basePath?: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [pending, startTransition] = useTransition();
@@ -187,7 +187,7 @@ export function JournalView({ sessions }: { sessions: DraftSession[] }) {
       <Card>
         <CardContent className="flex flex-col items-center gap-3 py-12 text-center text-muted-foreground">
           <p>No sessions yet.</p>
-          <Link href="/log" className={buttonVariants()}>
+          <Link href={`${basePath}log`} className={buttonVariants()}>
             Log your first session
           </Link>
         </CardContent>
@@ -206,7 +206,7 @@ export function JournalView({ sessions }: { sessions: DraftSession[] }) {
               Showing trades from <span className="font-bold text-blue-400">{dateFilter}</span>
             </span>
             <Link
-              href="/journal"
+              href={`${basePath}journal`}
               className="text-xs font-bold text-blue-400 hover:text-blue-300"
               onClick={() => setSelectedTradeId(null)}
             >
@@ -352,6 +352,7 @@ export function JournalView({ sessions }: { sessions: DraftSession[] }) {
             onViewFull={() => setViewFullTrade(selected)}
             onDeleteTrade={(id) => setConfirm({ kind: "trade", tradeId: id })}
             onDeleteSession={(id, date) => setConfirm({ kind: "session", sessionId: id, date })}
+            basePath={basePath}
           />
         )}
       </div>
@@ -394,11 +395,13 @@ function TradeDetailPane({
   onViewFull,
   onDeleteTrade,
   onDeleteSession,
+  basePath = "/",
 }: {
   ft: FlatTrade;
   onViewFull: () => void;
   onDeleteTrade: (id: string) => void;
   onDeleteSession: (id: string, date: string) => void;
+  basePath?: string;
 }) {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const t = ft.trade;
@@ -450,7 +453,7 @@ function TradeDetailPane({
             </div>
           </div>
           <ActionsDropdown
-            onEdit={() => { window.location.href = `/log/${ft.sessionDate}`; }}
+            onEdit={() => { window.location.href = `${basePath}log/${ft.sessionDate}`; }}
             onViewFull={onViewFull}
             onDeleteTrade={t.id ? () => onDeleteTrade(t.id!) : undefined}
             onDeleteSession={() => onDeleteSession(ft.sessionId, ft.sessionDate)}

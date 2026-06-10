@@ -3,7 +3,7 @@
 // (Prisma can't use "NY open" / "Stopped early" — see schema enums)
 // and Date <-> ISO string conversion.
 
-import type { Trade } from "@/generated/prisma/client";
+import type { Trade, DreamTrade } from "@/generated/prisma/client";
 import type {
   DraftTrade,
   ExecutionReview,
@@ -17,6 +17,28 @@ import type {
   Outcome,
   SessionWindow,
 } from "./domain/constants";
+
+// Both Trade and DreamTrade share the same fields; use a duck-type interface
+// so the mapper works for either model.
+interface TradeRow {
+  id: string;
+  occurredAt: Date;
+  instrument: string;
+  direction: string;
+  sessionWindow: string;
+  entries: unknown;
+  exits: unknown;
+  stopPrice: number;
+  targetPrice: number;
+  contracts: number;
+  outcome: string;
+  setup: unknown;
+  checklist: unknown;
+  executionReview: unknown;
+  psychology: unknown;
+  htfUrl: string | null;
+  ltfUrl: string | null;
+}
 
 const SESSION_DB_TO_UI: Record<string, SessionWindow> = {
   NY_open: "NY open",
@@ -52,7 +74,7 @@ function toLocalIso(d: Date): string {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
 }
 
-export function tradeRowToDraft(row: Trade): DraftTrade {
+export function tradeRowToDraft(row: TradeRow): DraftTrade {
   const rawSetup = row.setup as unknown as Record<string, unknown>;
   // Migrate old data shapes
   const primary =

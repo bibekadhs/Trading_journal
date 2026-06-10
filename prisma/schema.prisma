@@ -83,3 +83,45 @@ model Trade {
   @@index([userId, occurredAt(sort: Desc)])
   @@index([sessionId])
 }
+
+// Dream Project — completely isolated from real trading data.
+model DreamSession {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @db.Date
+  routine   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  trades    DreamTrade[]
+
+  @@unique([userId, date])
+  @@index([userId, date(sort: Desc)])
+}
+
+model DreamTrade {
+  id              String        @id @default(cuid())
+  sessionId       String
+  session         DreamSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  userId          String
+  occurredAt      DateTime
+  instrument      Instrument
+  direction       Direction
+  sessionWindow   SessionWindow
+  entries         Json
+  exits           Json
+  stopPrice       Float
+  targetPrice     Float
+  contracts       Int           @default(1)
+  outcome         Outcome
+  setup           Json
+  checklist       Json
+  executionReview Json
+  psychology      Json
+  htfUrl          String?
+  ltfUrl          String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([userId, occurredAt(sort: Desc)])
+  @@index([sessionId])
+}
