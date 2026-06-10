@@ -15,7 +15,9 @@
 
 # next.js
 /.next/
+**/.next/
 /out/
+Trading_Journal/
 
 # production
 /build
